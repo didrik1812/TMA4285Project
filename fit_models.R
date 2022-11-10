@@ -161,7 +161,7 @@ unsorted_pars <- function(pars, ns) {
 # ================================
 
 # Initialize data location and number of states to fit
-file_name = "C:\\Users\\didri\\OneDrive - NTNU\\7.Semester\\Tidsrekker\\project\\mouseData.mat"
+file_name = "mousedata.mat"
 num_states = 35
 quick_test = F # If fewer steps and neurons should be used for testing
 

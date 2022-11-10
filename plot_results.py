@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
 # Import data
-fname = "35_states_59_neurons_2022-11-06-111051.mat"
+fname = "25_states_59_neurons_2022-11-01-220446.mat"
 mat = scipy.io.loadmat(fname)
 tramat = mat["tramat"]
 state_sequence = mat["state_sequence"]
