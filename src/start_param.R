@@ -2,6 +2,22 @@ source("src/load_data.R")
 #library(circular)
 
 
+# ==================================
+# transition matrix with structure 
+# according to hypothesis
+# =================================
+make_trans_matrix=function(nst){
+  p = diag(0.5,nst) # probability of 0.5 to stay
+  
+  # probability of 0.25  to neighbor states 
+  for(rown in 0:(nst-1)){
+    i = (rown-1)%%nst +1 
+    j = (rown+1)%%nst +1
+    
+    p[rown+1,i] = p[rown+1,j] = 0.25
+  } 
+  return(p)
+}
 
 # ==============================
 # start parameters naive
@@ -18,8 +34,8 @@ naive_start_params<-function(nst,nneur){
   trstart= matrix(runif(nst*nst),byrow=T,nrow=nst)
   trstart = trstart/rowSums(trstart)
   
-  return(list(lambdas=resp0,
-              transmat=trstart,
+  return(list(resp=resp0,
+              tramat=trstart,
               px0=instart))
   
 }
@@ -36,10 +52,10 @@ start_params<-function(nst){
   observed_map = make_observed_map(observed_ang, nst)
   cell_data = load_cell_data()[,not_nan]
   
-  smallest_resp = 0.001
+  smallest_resp = 0.001 # idea: small, but not to hard to "escape" in optimization 
   
+  # set lambdas from observed data for angle interval
   resp_param = matrix(data=NaN,nrow =nrow(cell_data),ncol = nst)
-  
   for(st in 1:nst){
     st_cols = cell_data[,observed_map$map[[st]]]
     if(ncol(st_cols) > 5){
@@ -59,15 +75,12 @@ start_params<-function(nst){
     } 
   }
   
-  # transform to log?
-  # resp_param = log(resp_param)
-  
   # set px0
   px0 = rep(0,nst)
   px0[observed_map$x0] = 1
   
-  return(list(lambdas=as.vector(resp_param),
-              transmat=make_start_trans(nst),
+  return(list(resp=as.vector(resp_param),
+              tramat=make_start_trans(nst),
               px0 =px0))
 }
 
@@ -96,11 +109,12 @@ make_observed_map <-function(observed_ang,nst){
   
   # find x0:
   v0 = observed_ang[1]
+  # test for v0 smaller then first start of interval: then x0 is in the last state
   if(v0<start_ang[1]){
     x0 = nst
     } else{
-    x0 = which.min(abs(v0-start_ang))
-    if(start_ang[x0]>v0) x0=x0-1
+    x0 = which.min(abs(v0-start_ang)) # find closest start of interval
+    if(start_ang[x0]>v0) x0=x0-1  # shift when start of interval is bigger than v0  
   }
 
   # for each state: find indexes where the angle fit the state
@@ -133,7 +147,7 @@ circular.interpol <- function(v){
   }
 
 # =================================
-# parameters for simulation
+# parameters for simulation (old)
 # ================================
 
 head_pos_param <- function(num_state,num_neuron){
@@ -163,17 +177,6 @@ head_pos_param <- function(num_state,num_neuron){
   
   if(num_neuron>1)rownames(rate_mat)=resnames
   
-  return(list(lambdas=rate_mat,
-              transmat=p))
-}
-
-make_trans_matrix=function(nst){
-  p = diag(0.5,nst)
-  for(rown in 0:(nst-1)){
-    i = (rown-1)%%nst +1 
-    j = (rown+1)%%nst +1
-    
-    p[rown+1,i] = p[rown+1,j] = 0.25
-  } 
-  return(p)
+  return(list(resp=rate_mat,
+              tramat=p))
 }

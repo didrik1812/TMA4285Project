@@ -18,9 +18,9 @@ get_fname = function(key="all"){
 load_par_est<-function(nst){
   library(R.matlab)
   key = paste("par_lab",nst,sep = "_")
-  
   fname = get_fname(key)
-  if(is.null(fnmae)) return()
+  
+  if(is.null(fname)) return()
   
   return(readMat(fname))
 }
