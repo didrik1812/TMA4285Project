@@ -1,4 +1,6 @@
 import scipy
+import scipy.stats
+import scipy.io
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
