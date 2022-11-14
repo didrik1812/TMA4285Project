@@ -1,0 +1,10 @@
+nst: 20 tes-ll: -194619.72250529
+nst: 25 tes-ll: -193468.689044077
+nst: 30 tes-ll: -192759.672039726
+nst: 35 tes-ll: -192349.619432727
+nst: 40 tes-ll: -191826.569010844
+best: 40
+
+Fraction of train: 0.75
+Time steps gap: 500
+Time steps test: 3311
