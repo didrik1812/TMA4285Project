@@ -18,15 +18,15 @@ my.hmm <- setRefClass("my.hmm",field= list(f="matrix",
                                            Tr.cc = "numeric" ,
                                            Tr.debug = "matrix",
                                            Tr.change="numeric"))
-my.hmm$methods(initialize=function(param,y){
+my.hmm$methods(initialize=function(param,y,run.filter=T){
   .self$Tr <- param$tramat
   .self$px0 = param$px0
   .self$nst = nrow(Tr)
   .self$lambdas <-matrix(param$resp,ncol=nst) # lambdas as matrix 
   .self$nneur = nrow(lambdas) 
   .self$y = matrix(y,nrow=nrow(lambdas)) # data as matrix
-  .self$ntimes = ncol(y)
-  .self$filter() # run filter 
+  .self$ntimes = ncol(.self$y)
+  if(run.filter) .self$filter() # run filter 
 })
 
 #====================
@@ -39,7 +39,7 @@ my.hmm$methods(optim.param=function(niter){
     .self$smoothing()
     
     # test for NaN in Transmat:
-    if(sum(is.nan(Tr.hat))>0){print("NaN in transmat :("); return()}
+    if(sum(is.nan(Tr.hat))>0){warning("NaN in transmat :("); break}
     
     # control values
     prev.ll = ll
@@ -52,11 +52,12 @@ my.hmm$methods(optim.param=function(niter){
     
     # test for divergence
     if(ll < prev.ll){
-      print("divergence: use prev estimate")
       Tr <<- Tr.copy
       lambdas <<- lambdas.copy
+      print("use prev estimate")
       print("rerun filter:")
       .self$filter()
+      warning("divergence")
       break
     }
     
