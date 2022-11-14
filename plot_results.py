@@ -8,12 +8,19 @@ from matplotlib.colors import LogNorm
 import matplotlib.animation
 plt.ion()
 
+# Whether to animate the state sequence
+# Certain graphics backends are somehow very inefficient
+# (VSCode interactive with "%matplotlib tk" is fast)
+animate = True
+
 # Import data
 fname = "25_states_59_neurons_2022-11-01-220446.mat"
 mat = scipy.io.loadmat(fname)
 tramat = mat["tramat"]
 state_sequence = mat["state_sequence"]
-angdata = mat["angdata"][0]
+angdata = mat["angdata"]
+if len(angdata) == 1:
+    angdata = angdata[0]
 
 # Prepare weghts and graph stuff
 tramat_no_diag = np.copy(tramat)
@@ -44,41 +51,47 @@ for i in range(num_states):
         )
     counts[i] = count
 
-fig = plt.figure()
-ax = fig.add_subplot(projection = 'polar')
-ax.set_yticklabels("")
-ax.set_theta_zero_location('N')
-title = ax.text(0.5, 0.5, "Timestep: 0", bbox={'facecolor':'w', 'alpha':0.5, 'pad':5})
+if animate:
+    fig = plt.figure()
+    ax = fig.add_subplot(projection = 'polar')
+    ax.set_yticklabels("")
+    ax.set_theta_zero_location('N')
+    title = ax.text(0.5, 0.5, "Timestep: 0", bbox={'facecolor':'w', 'alpha':0.5, 'pad':5})
 
-line1, = ax.plot([0, meanvalues[int(state_sequence[0])-1]],[0,1], color = 'b', linewidth = 1)
-point1, = ax.plot(angdata[0],1, color='g', marker='o', markersize = 4)
+    line1, = ax.plot([0, meanvalues[int(state_sequence[0])-1]],[0,1], color = 'b', linewidth = 1)
+    point1, = ax.plot(angdata[0],1, color='g', marker='o', markersize = 4)
+    shade1 = ax.fill_between(np.linspace(meanvalues[int(state_sequence[0])-1]-stdvalues[int(state_sequence[0])-1], meanvalues[int(state_sequence[0])-1]+stdvalues[int(state_sequence[0])-1],10),0,1, alpha=0.3, color='b')
+    shade1.set_animated(True)
 
-legend_elements = [matplotlib.lines.Line2D([0],[0], color='b', lw=1, label="Inferred angle"),
-                   matplotlib.lines.Line2D([0],[0], color='r', lw=1, label="No inferred angle"),
-                   matplotlib.lines.Line2D([0],[0], color='w', marker='o', markerfacecolor='g', markersize=8, label="Measured angle"),
-                   matplotlib.lines.Line2D([0],[0], color='w', marker='o', markerfacecolor='r', markersize=8, label="No measured angle")]
-ax.legend(handles=legend_elements, loc="center")
+    legend_elements = [matplotlib.lines.Line2D([0],[0], color='b', lw=1, label="Inferred angle"),
+                    matplotlib.lines.Line2D([0],[0], color='r', lw=1, label="No inferred angle"),
+                    matplotlib.lines.Line2D([0],[0], color='w', marker='o', markerfacecolor='g', markersize=8, label="Measured angle"),
+                    matplotlib.lines.Line2D([0],[0], color='w', marker='o', markerfacecolor='r', markersize=8, label="No measured angle")]
+    ax.legend(handles=legend_elements, loc="center")
 
-def update(t):
-    if meanvalues[int(state_sequence[t])-1] == 0:
-        line1.set_color('r')
-    else:
-        line1.set_data([0, meanvalues[int(state_sequence[t])-1]],[0,1])
-        line1.set_color('b')
-    if np.isnan(angdata[t]):
-        point1.set_color('r')
-    else:
-        point1.set_data([angdata[t],1])
-        point1.set_color('g')
-    title.set_text("Timestep: " + str(t))
-    return line1, point1, title
+    def update(t):
+        if meanvalues[int(state_sequence[t])-1] == 0:
+            line1.set_color('r')
+            shade1 = ax.fill_between(np.linspace(line1.get_data()[0][1]-stdvalues[np.where(meanvalues == line1.get_data()[0][1])[0][0]], line1.get_data()[0][1]+stdvalues[np.where(meanvalues == line1.get_data()[0][1])[0][0]],10),0,1, alpha=0.3, color='r')
+        else:
+            line1.set_data([0, meanvalues[int(state_sequence[t])-1]],[0,1])
+            line1.set_color('b')
+            shade1 = ax.fill_between(np.linspace(meanvalues[int(state_sequence[t])-1]-stdvalues[int(state_sequence[t])-1], meanvalues[int(state_sequence[t])-1]+stdvalues[int(state_sequence[t])-1],10),0,1, alpha=0.3, color='b')
+        shade1.set_animated(True)
+        if np.isnan(angdata[t]):
+            point1.set_color('r')
+        else:
+            point1.set_data([angdata[t],1])
+            point1.set_color('g')
+        title.set_text("Timestep: " + str(t))
+        return line1, point1, title, shade1
 
-frames = np.arange(0,len(state_sequence))
+    frames = np.arange(0,len(state_sequence))
 
-fig.canvas.draw()
-ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=50)
+    fig.canvas.draw()
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=20)
 
-plt.show()
+    plt.show()
 
 # Sort the states by average angle (and counts if tied (only realistically occurs if the mean angle is not set))
 inds = np.argsort(
