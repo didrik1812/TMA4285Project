@@ -86,6 +86,10 @@ start_params<-function(nst){
 
 
 make_start_trans <-function(nst){
+  return(matrix(1/nst,nrow=nst,ncol=nst))
+}
+
+make_near_hyp_mat <-function(nst){
   p = make_trans_matrix(nst)
   p[p==0]=0.05 #  set a x s.t. 0 < x << 0.25 
   
