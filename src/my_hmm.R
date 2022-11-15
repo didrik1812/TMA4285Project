@@ -72,7 +72,7 @@ my.hmm$methods(update.param=function(){
   Tr <<- Tr.hat
   lambdas <<- lambdas.hat
 })
-# =========================================== 
+# ==========================================
 #         VITERBI
 #===========================================
 my.hmm$methods(viterbi=function(){
@@ -83,14 +83,13 @@ my.hmm$methods(viterbi=function(){
   log.fy = log(fy)
   
   # forward recursion: find arg.max mu
-  mu = log(f[,1])
+   mu = as.vector(log.fy[,1]+log(t(Tr)%*%px0)) # mu0 = log(p(x1,y1)) = log(p(y1|x1)p(x1))
   for(t in 2:ntimes){
     mu.Tr = mu+log.T
     max.t = apply(mu.Tr,2,which.max) # arg. for highest col values
     
     mu = mu.Tr[cbind(max.t,c.indx)] # correct col.values from mu.Tr
     mu = log.fy[,t]+mu
-    #mu = mu/sum(mu)
     
     max.x[,(t-1)] = max.t
   }
