@@ -14,7 +14,10 @@ plt.ion()
 animate = True
 
 # Import data
-fname = "25_states_59_neurons_2022-11-01-220446.mat"
+fname = "45_states_59_neurons_2022-11-14-162252.mat"
+# fname = "25_states_59_neurons_2022-11-01-220446.mat"
+# fname = "40_states_59_neurons_2022-11-14-140729.mat"
+# fname = "60_states_59_neurons_2022-11-14-144627.mat"
 mat = scipy.io.loadmat(fname)
 tramat = mat["tramat"]
 state_sequence = mat["state_sequence"]
@@ -25,6 +28,7 @@ if len(angdata) == 1:
 # Prepare weghts and graph stuff
 tramat_no_diag = np.copy(tramat)
 np.fill_diagonal(tramat_no_diag, 0)
+tramat_no_diag_normal = tramat_no_diag / np.max(tramat_no_diag)
 weights = tramat / np.mean(tramat_no_diag)
 num_states = len(tramat)
 meanvalues = np.zeros(num_states)
@@ -133,29 +137,36 @@ for from_state in range(len(tramat)):
                             weights[inds[from_state]][inds[to_state]]
                             + weights[inds[to_state]][inds[from_state]]
                         ),
+                        color = (0,0,0,0.9* 0.5 * (
+                            tramat_no_diag_normal[inds[from_state]][inds[to_state]]
+                            + tramat_no_diag_normal[inds[to_state]][inds[from_state]]
+                            + 0.1))
                     )
+
+edge_colors = [state_network[u][v]['color'] for u,v in state_network.edges()]
+edge_widths = 25/np.max(weights) * np.array([state_network[u][v]['weight'] for u,v in state_network.edges()]) + 1
 
 # Extract number of states used in the graph
 num_used_states = len(list(state_network.nodes))
 
 # Fix the position of the first node (gives a similar graph rotation every time)
-r = 2 * np.pi / (num_used_states * np.sqrt(num_used_states))
-first_node = list(state_network.nodes)[0]
-fixed_pos = {first_node: [r, 2 * r]}
+#r = 2 * np.pi / (num_used_states * np.sqrt(num_used_states))
+#first_node = list(state_network.nodes)[0]
+#fixed_pos = {first_node: [r, 2 * r]}
 
 # Find a spring layout and a spectral layout for the graph
 pos1 = nx.spring_layout(
-    state_network, pos=fixed_pos, fixed=[first_node], iterations=200, threshold=1e-25
-)
+    state_network, #pos=fixed_pos, fixed=[first_node],
+    iterations=1000, threshold=1e-40)
 pos2 = nx.spectral_layout(state_network)
 pos3 = nx.spiral_layout(state_network)
 
 # Plot the graph layouts
 plt.figure()
-nx.draw(state_network, pos1, with_labels=True)
+nx.draw(state_network, pos1, with_labels=True, edge_color = edge_colors, width = edge_widths)
 plt.show()
 plt.figure()
-nx.draw(state_network, pos2, with_labels=True)
+nx.draw(state_network, pos2, with_labels=True, edge_color = edge_colors, width = edge_widths)
 plt.show()
 plt.figure()
 nx.draw(state_network, pos3, with_labels=True)
