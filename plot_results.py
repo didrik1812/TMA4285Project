@@ -11,7 +11,15 @@ plt.ion()
 # Whether to animate the state sequence
 # Certain graphics backends are somehow very inefficient
 # (VSCode interactive with "%matplotlib tk" is fast)
-animate = True
+# Saving the animation further requires ffmpeg or imagemagick
+# and does some update frame tricks that are much slower than
+# running the code with save_anim = False. In addition, all frames
+# of this slower execution must be rendered before the code continues. 
+# WARNING: For some reasons the color updates don't work properly
+# on the displayed figure if save_anim = True, but the actually
+# saved animation is correct. ¯\_(ツ)_/¯
+animate = False
+save_anim = False 
 
 # Import data
 fname = "45_states_59_neurons_2022-11-14-162252.mat"
@@ -74,6 +82,8 @@ if animate:
     ax.legend(handles=legend_elements, loc="center")
 
     def update(t):
+        if save_anim:
+            ax.collections.pop()
         if meanvalues[int(state_sequence[t])-1] == 0:
             line1.set_color('r')
             shade1 = ax.fill_between(np.linspace(line1.get_data()[0][1]-stdvalues[np.where(meanvalues == line1.get_data()[0][1])[0][0]], line1.get_data()[0][1]+stdvalues[np.where(meanvalues == line1.get_data()[0][1])[0][0]],10),0,1, alpha=0.3, color='r')
@@ -93,9 +103,12 @@ if animate:
     frames = np.arange(0,len(state_sequence))
 
     fig.canvas.draw()
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=20)
-
-    plt.show()
+    if save_anim:
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames[:200], blit=True, interval=50)
+        ani.save('animation.svg')#, writer='imagemagick')#, fps=30)
+    else:
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=20)
+        plt.show()
 
 # Sort the states by average angle (and counts if tied (only realistically occurs if the mean angle is not set))
 inds = np.argsort(
