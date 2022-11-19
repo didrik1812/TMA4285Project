@@ -1,4 +1,5 @@
 my.hmm <- setRefClass("my.hmm",field= list(f="matrix",
+                                           filter.computed = "logical",
                                            p="matrix",
                                            s="matrix",
                                            global.x = "numeric",
@@ -18,26 +19,30 @@ my.hmm <- setRefClass("my.hmm",field= list(f="matrix",
                                            Tr.cc = "numeric" ,
                                            Tr.debug = "matrix",
                                            Tr.change="numeric"))
-my.hmm$methods(initialize=function(param,y,run.filter=T){
-  .self$Tr <- param$tramat
-  .self$px0 = param$px0
-  .self$nst = nrow(Tr)
-  .self$lambdas <-matrix(param$resp,ncol=nst) # lambdas as matrix 
-  .self$nneur = nrow(lambdas) 
+my.hmm$methods(initialize=function(param,y,run.filter=F){
+  .self$set.params(param)
   .self$y = matrix(y,nrow=nrow(lambdas)) # data as matrix
   .self$ntimes = ncol(.self$y)
   if(run.filter) .self$filter() # run filter 
 })
 
+my.hmm$methods(set.params=function(param){
+  .self$filter.computed <- FALSE # filter not computed with new parameters
+  .self$Tr <- param$tramat
+  .self$px0 = param$px0
+  .self$nst = nrow(Tr)
+  .self$lambdas <-matrix(param$resp,ncol=nst) # lambdas as matrix 
+  .self$nneur = nrow(lambdas) 
+})
 #====================
 # optim param
 # ===================
 my.hmm$methods(optim.param=function(niter){
   start_time <- Sys.time()
+  if(!filter.computed){.self$filter()}
   print(paste("start ll:",ll))
   for(it in 1:niter){
     .self$smoothing()
-    
     # test for NaN in Transmat:
     if(sum(is.nan(Tr.hat))>0){warning("NaN in transmat :("); break}
     
@@ -48,15 +53,17 @@ my.hmm$methods(optim.param=function(niter){
     lambdas.copy = lambdas
 
     .self$update.param()
-    .self$filter()
+    .self$filter() # run filter to compute new ll
     
-    # test for divergence
+    # test for divergence (could also test convergence...)
     if(ll < prev.ll){
       Tr <<- Tr.copy
       lambdas <<- lambdas.copy
       print("use prev estimate")
-      print("rerun filter:")
-      .self$filter()
+      filter.computed <<- F # filter is now computed for wrong parameters
+      ll_v <<- c(ll_v,prev.ll) # keep bad ll, add ll to current param
+      # print("rerun filter:")
+      # .self$filter()
       warning("divergence")
       break
     }
@@ -71,6 +78,7 @@ my.hmm$methods(optim.param=function(niter){
 my.hmm$methods(update.param=function(){
   Tr <<- Tr.hat
   lambdas <<- lambdas.hat
+  filter.computed <<- FALSE  #not yet computed filter
 })
 # ==========================================
 #         VITERBI
@@ -83,7 +91,7 @@ my.hmm$methods(viterbi=function(){
   log.fy = log(fy)
   
   # forward recursion: find arg.max mu
-   mu = as.vector(log.fy[,1]+log(t(Tr)%*%px0)) # mu0 = log(p(x1,y1)) = log(p(y1|x1)p(x1))
+  mu = as.vector(log.fy[,1]+log(t(Tr)%*%px0)) # mu0 = log(p(x1,y1)) = log(p(y1|x1)p(x1))
   for(t in 2:ntimes){
     mu.Tr = mu+log.T
     max.t = apply(mu.Tr,2,which.max) # arg. for highest col values
@@ -126,6 +134,9 @@ my.hmm$methods(smoothing = function(){
   # the evidence find really unlikely to be the true state. Thus: 
   # f(x_t = i,x_{t+1}=j|y_{t:n}) -> 0 for all j, so  it should be ok to set NaN to 0 ?
   #
+  
+  # run filter, if not computed
+  if (!filter.computed){.self$filter()}
   
   start_time <- Sys.time()
   phi.next = rep(1,nst)
@@ -177,9 +188,8 @@ my.hmm$methods(smoothing = function(){
 # =========================================== 
 #         FILTER
 #===========================================
-my.hmm$methods(filter=function(store.fy=T){
+my.hmm$methods(filter=function(){
     fy <<- .self$compute_eval()
-   
     start_time <- Sys.time()
     
     lT = t(Tr)
@@ -205,11 +215,10 @@ my.hmm$methods(filter=function(store.fy=T){
     f <<- lf[,1:ntimes]
     p <<- lp[,1:ntimes]
     ll_v <<- c(ll_v,ll)
+    filter.computed <<- TRUE
     
-    if(!store.fy) fy <<- matrix(ncol = 0,nrow=0)  # fy will vanish from memory when function end?
     print(paste("computed f and p in",format(Sys.time()-start_time)))
-   
-     return(f)
+    return(f)
 })
 
 # =========================================== 

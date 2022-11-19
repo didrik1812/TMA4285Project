@@ -7,6 +7,7 @@ train.test.hmm<- setRefClass("train.test.hmm", fields = c("ntest",
                            contains =c("my.hmm"))
 
 
+# should be fixed for cases where we do not need to run filter
 train.test.hmm$methods(initialize=function(param,y,frac.train=NULL,ngap=NULL){
   .self$config(frac.train,ngap)
   
@@ -19,7 +20,7 @@ train.test.hmm$methods(initialize=function(param,y,frac.train=NULL,ngap=NULL){
   .self$test.o = my.hmm(param=param,y=test.y,run.filter=F)
   
   .self$test.o$px0 = compute.px0()
-  .self$test.o$filter() # run filter with correct px0
+  .self$test.o$filter() # run filter with correct px0 on test
   
   .self$ntest = test.o$ntimes
   
