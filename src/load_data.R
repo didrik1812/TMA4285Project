@@ -8,11 +8,31 @@ get_fname = function(key="all"){
   l["lab_data"] =  "mousedata.mat"
   l["par_lab_25"] = "25_states_59_neurons_2022-11-01-220446.mat"
   l["par_lab_35"] = "35_states_59_neurons_2022-11-06-111051.mat"
+  l["sim_dir"] = "sim_res/res_2022-11-18-1748/"
   
   if(key=="all")return(names(l))
   if(!key %in% names(l))return()
   
   return(as.character(l[key]))
+}
+
+load_sim <- function(nst,nst_true){
+  library(R.matlab)
+  library(stringr)
+  
+  sim_dir = get_fname("sim_dir")
+  in_sim_dir = list.files(sim_dir)
+  key = paste("param",nst,"true",nst_true,sep = "_")
+  fname = in_sim_dir[str_detect(in_sim_dir,key)]
+  if(is.null(fname)) return()
+  
+  fname = paste(sim_dir,fname,sep="")
+  return(readMat(fname))
+}
+
+sim_figs <-function(){
+  sim_dir = get_fname("sim_dir")
+  return(paste(sim_dir,"sim_figs/",sep=""))
 }
 
 load_par_est<-function(nst){
