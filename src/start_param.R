@@ -6,16 +6,22 @@ source("src/load_data.R")
 # transition matrix with structure 
 # according to hypothesis
 # =================================
-make_trans_matrix=function(nst){
-  p = diag(0.5,nst) # probability of 0.5 to stay
+make_trans_matrix=function(nst,to.self=0.5, to.next=0.25){
+  p = diag(to.self,nst) # set probability to stay
   
-  # probability of 0.25  to neighbor states 
+  # set probability to neighbor states 
   for(rown in 0:(nst-1)){
     i = (rown-1)%%nst +1 
     j = (rown+1)%%nst +1
     
-    p[rown+1,i] = p[rown+1,j] = 0.25
+    p[rown+1,i] = p[rown+1,j] = to.next
   } 
+  
+  remain_prob = 1 -(to.self+2*to.next)
+  distant_prob = remain_prob/(nst-3)
+  
+  p[p==0] = distant_prob 
+  
   return(p)
 }
 
@@ -90,10 +96,14 @@ make_start_trans <-function(nst){
 }
 
 make_near_hyp_mat <-function(nst){
-  p = make_trans_matrix(nst)
-  p[p==0]=0.05 #  set a x s.t. 0 < x << 0.25 
+  to.self = 0.24
+  to.next = 0.12
+  p = make_trans_matrix(nst,to.self,to.next)
   
-  p = p/rowSums(p) # normalize
+  #not_neigh_prob = 1- 
+  #p[p==0]=0.05 #  set a x s.t. 0 < x << 0.25 
+  #
+  #p = p/rowSums(p) # normalize
   
   return(p)
 }
