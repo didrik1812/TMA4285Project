@@ -29,7 +29,7 @@ Tr40 = make_near_hyp_mat(40)
 # ====================================================
 #  TABLES
 # ====================================================  
-base_ll = stored_25_25$true.ll # to shift ll with
+base_ll = as.numeric(stored_25_25$true.ll) # to shift ll with
 
 meansmat = matrix(0,nrow=3,ncol=2)
 ll_mat = matrix(0,nrow=3,ncol=2)
