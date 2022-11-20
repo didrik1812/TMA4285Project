@@ -1,5 +1,19 @@
 estimate_stats = function(estMat,TrueMat,casenr,save_dir){
+  save_res = save_dir != nullfile()
+  
   fnames = c("25_true_25","40_true_25","25_true_40")
+  
+  # xlabs:
+  xlab.self = "Probability of self-transitions"
+  xlab.n ="Probability of neighbor-transitions"
+  xlab.nn="Probability of not-neighbor-transitions"
+  
+  # Mains:
+  main.self = "Distribution of self-transitions"
+  main.n = "Distribution of neighbor-transitions"
+  main.nn = "Distribution of not-neighbor-transitions"
+  
+  # True probs
   self.prob = TrueMat[1,1]
   neigh.prob = TrueMat[1,2]
   not.neigh.prob = TrueMat[1,3]
@@ -9,30 +23,33 @@ estimate_stats = function(estMat,TrueMat,casenr,save_dir){
   neigh =  get_neigh_el(estMat)
   self_tr = diag(estMat)
   
-  # store means
+  # means
   meansr = c(mean(self_tr),mean(neigh))
   
   # make plot
-  filename = paste(save_dir,"self_",fnames[casenr],".png",sep="")
-  png(file=filename,
-      width=400, height=200)
-  hist(self_tr,xlab="Probability of self-transitions",main="Distribution of self-transitions")
+  if(save_res){
+    filename = paste(save_dir,"self_",fnames[casenr],".png",sep="")
+    png(file=filename, width=400, height=200)    
+  }
+  hist(self_tr,xlab=xlab.self,main=main.self)
   abline(v=self.prob, col="blue",lwd=3)
-  dev.off()
+  if(save_res) dev.off()
   
-  filename = paste(save_dir,"neighbor_",fnames[casenr],".png",sep="")
-  png(file=filename,
-      width=400, height=200)
-  hist(neigh,xlab="Probability of neighbor-transitions",main="Distribution of neighbor-transitions")
+  if(save_res){
+    filename = paste(save_dir,"neighbor_",fnames[casenr],".png",sep="")
+    png(file=filename, width=400, height=200) 
+  }
+  hist(neigh,xlab=xlab.n,main=main.n)
   abline(v=neigh.prob, col="blue",lwd=3)
-  dev.off()
+  if(save_res) dev.off()
   
-  filename = paste(save_dir,"remain_",fnames[casenr],".png",sep="")
-  png(file=filename,
-      width=400, height=200)
-  hist(not_neigh,xlab="Probability of not-neighbor-transitions",main="Distribution of not-neighbor-transitions")
+  if(save_res){
+    filename = paste(save_dir,"remain_",fnames[casenr],".png",sep="")
+    png(file=filename, width=400, height=200)
+  }
+  hist(not_neigh,xlab=xlab.nn,main=main.nn)
   abline(v=not.neigh.prob, col="blue",lwd=3)
-  dev.off()
+  if(save_res) dev.off()
   
   return(meansr)
 }
