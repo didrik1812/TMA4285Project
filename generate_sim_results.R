@@ -54,7 +54,7 @@ colnames(ll_mat) = c("True ll",
 # FILL IN TABELS AND MAKE TRANSIITION STATS FIGURES
 # ====================================================
 for(casenr in 1:3){
-  stored_o = list(stored_25_25,stored_25_40,stored_40_25)[[casenr]]
+  stored_o = list(stored_25_25,stored_40_25,stored_25_40)[[casenr]]
   true_Tr = list(Tr25,Tr25,Tr40)[[casenr]]
   
   ll_mat[casenr,] = c(stored_o$true.ll,stored_o$ll)
