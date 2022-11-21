@@ -4,7 +4,7 @@ source("src/start_param.R") # functions for making start parameters
 source("src/load_data.R") # functions for loading data
 
 
-nst = 45
+nst = 60
 start_at_known_ang = TRUE
 y = load_cell_data(from.x1 = start_at_known_ang) # start from first known state
 use.homo = T
@@ -22,8 +22,8 @@ key=list(cex.axis=0.75)
 par(oma=c(1,1,1,1.5))
 plot(mod$Tr,col=col,key=key)
 
-# continue optim 5 more 
-mod$optim.param(25)
+# continue optim 50 more (or until divergence)
+mod$optim.param(50)
 
 # plot likelihood-history (still not converged, it seems)
 plot(mod$ll_v[-1])
@@ -52,31 +52,31 @@ plot(s[i],pch=20,cex=0.8, main="prop of most likely hidden sequence")
 # Export results to mat file
 writeMat(paste(toString(nst), "_states_", toString(dim(y)[1]), "_neurons_", format(Sys.time(), "%Y-%m-%d-%H%M%S.mat"), sep = ""), resp = mod$lambdas, tramat = mod$Tr, px0 = mod$px0, angdata = load_ang_data(from.x1 = start_at_known_ang), post = NULL, state_sequence = gx)
 
-# load stored model
-stored.25 = load_par_est(25)
-param.stored = list(resp=exp(stored.25$resp),
-               tramat=stored.25$tramat,
-               px0=as.vector(stored.25$px0))
+# # load stored model
+# stored.25 = load_par_est(25)
+# param.stored = list(resp=exp(stored.25$resp),
+#                tramat=stored.25$tramat,
+#                px0=as.vector(stored.25$px0))
 
-mod.stored = my.hmm(param.stored, load_cell_data(from.x1 = F)) # load full cell data
+# mod.stored = my.hmm(param.stored, load_cell_data(from.x1 = F)) # load full cell data
 
-# try one more iteration in optim:
-mod.stored$optim.param(1)
+# # try one more iteration in optim:
+# mod.stored$optim.param(1)
 
-# looks like: converges to vanishing state
-# which produces NaN. the ll is very bad. but interesting.
-print(paste("(ll of mod) - (ll of stored)  : ",mod$ll-mod.stored$ll))
+# # looks like: converges to vanishing state
+# # which produces NaN. the ll is very bad. but interesting.
+# print(paste("(ll of mod) - (ll of stored)  : ",mod$ll-mod.stored$ll))
 
-# plot lambdas in stored and new model
-par(oma=c(1,1,1,1.5))
-par(mfrow=c(1,2))
-plot(mod$lambdas, main = "new model",col=col)
-plot(mod.stored$lambdas, main = "stored model",col=col)
+# # plot lambdas in stored and new model
+# par(oma=c(1,1,1,1.5))
+# par(mfrow=c(1,2))
+# plot(mod$lambdas, main = "new model",col=col)
+# plot(mod.stored$lambdas, main = "stored model",col=col)
 
-# plot transmat in stored and new model
-par(oma=c(1,1,1,1.5))
-par(mfrow=c(1,2))
-plot(mod$Tr, main = "new model",col=col)
-plot(mod.stored$Tr, main = "stored model",col=col)
+# # plot transmat in stored and new model
+# par(oma=c(1,1,1,1.5))
+# par(mfrow=c(1,2))
+# plot(mod$Tr, main = "new model",col=col)
+# plot(mod.stored$Tr, main = "stored model",col=col)
 
 

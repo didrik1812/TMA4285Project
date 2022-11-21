@@ -45,11 +45,11 @@ for e in all_data:
 test_results_best = [max(test_ll[i]) for i in range(len(states))]
 
 plt.figure()
-plt.title(info[0])
+# plt.title(info[0])
 plt.xlabel("Number of states fitted")
-plt.ylabel("loglikelihood on test data")
+plt.ylabel("log likelihood of test data")
 plt.plot(states, test_results, label = "Final ll")
-plt.plot(states, test_results_best, label = "Maximum ll")
-plt.legend()
+# plt.plot(states, test_results_best, label = "Maximum ll")
+# plt.legend()
 plt.tight_layout()
 plt.show()

@@ -18,11 +18,11 @@ plt.ion()
 # WARNING: For some reasons the color updates don't work properly
 # on the displayed figure if save_anim = True, but the actually
 # saved animation is correct. ¯\_(ツ)_/¯
-animate = False
-save_anim = False 
+animate = True
+save_anim = True 
 
 # Import data
-fname = "45_states_59_neurons_2022-11-14-162252.mat"
+fname = "45_states_59_neurons_2022-11-16-170235.mat"
 # fname = "25_states_59_neurons_2022-11-01-220446.mat"
 # fname = "40_states_59_neurons_2022-11-14-140729.mat"
 # fname = "60_states_59_neurons_2022-11-14-144627.mat"
@@ -104,8 +104,8 @@ if animate:
 
     fig.canvas.draw()
     if save_anim:
-        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames[:200], blit=True, interval=50)
-        ani.save('animation.svg')#, writer='imagemagick')#, fps=30)
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=50)
+        ani.save(fname[:-4] + '.mp4')#, writer='imagemagick')#, fps=30)
     else:
         ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, blit=True, interval=20)
         plt.show()
