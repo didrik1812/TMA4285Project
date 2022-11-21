@@ -28,7 +28,7 @@ Here follows the files that are used to produce the figures displayed in the rep
 * `mousedata.mat`: Real rat data used in model fitting.
 
 
-## Other files in folders
+## Other folders
 
 ### train_test_res
 
