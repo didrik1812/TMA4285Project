@@ -22,7 +22,7 @@ animate = True
 save_anim = True 
 
 # Import data
-fname = "45_states_59_neurons_2022-11-16-170235.mat"
+fname = "data_res/45_states_59_neurons_2022-11-16-170235.mat"
 # fname = "25_states_59_neurons_2022-11-01-220446.mat"
 # fname = "40_states_59_neurons_2022-11-14-140729.mat"
 # fname = "60_states_59_neurons_2022-11-14-144627.mat"

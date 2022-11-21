@@ -22,10 +22,10 @@ animate = False
 save_anim = False 
 
 # Import data for 4 cases (Very ungeneral)
-fname1 = "15_states_59_neurons_2022-11-16-165359.mat"
-fname2 = "30_states_59_neurons_2022-11-16-165712.mat"
-fname3 = "45_states_59_neurons_2022-11-16-170235.mat"
-fname4 = "60_states_59_neurons_2022-11-16-171208.mat"
+fname1 = "data_res/15_states_59_neurons_2022-11-16-165359.mat"
+fname2 = "data_res/30_states_59_neurons_2022-11-16-165712.mat"
+fname3 = "data_res/45_states_59_neurons_2022-11-16-170235.mat"
+fname4 = "data_res/60_states_59_neurons_2022-11-16-171208.mat"
 mats = [scipy.io.loadmat(fname1),
         scipy.io.loadmat(fname2),
         scipy.io.loadmat(fname3),
