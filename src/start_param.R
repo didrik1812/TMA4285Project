@@ -1,11 +1,17 @@
 source("src/load_data.R")
-#library(circular)
 
-
-# ==================================
-# transition matrix with structure 
-# according to hypothesis
-# =================================
+# ====================================
+# transition matrix for simulation:
+# matrix with structure  according 
+# to hypothesis
+# ===================================
+make_near_hyp_mat <-function(nst){
+  to.self = 0.24
+  to.next = 0.12
+  p = make_trans_matrix(nst,to.self,to.next)
+  
+  return(p)
+}
 make_trans_matrix=function(nst,to.self=0.5, to.next=0.25){
   p = diag(to.self,nst) # set probability to stay
   
@@ -24,28 +30,6 @@ make_trans_matrix=function(nst,to.self=0.5, to.next=0.25){
   
   return(p)
 }
-
-# ==============================
-# start parameters naive
-# ===============================
-# init values (should probably fit data better):
-# the lambdas are given as a vector. (some) investigation indicate that this correspond to a matrix 
-# constructed by row, whit each row corresponding to a state 
-# (compare summary to response-elements in getpars) 
-naive_start_params<-function(nst,nneur){
-  resp0 = runif(nst*nneur,1,5)
-  instart = runif(nst)
-  instart = instart/(sum(instart))
-  
-  trstart= matrix(runif(nst*nst),byrow=T,nrow=nst)
-  trstart = trstart/rowSums(trstart)
-  
-  return(list(resp=resp0,
-              tramat=trstart,
-              px0=instart))
-  
-}
-
 
 # ==============================
 # start parameters for lab-data
@@ -95,18 +79,6 @@ make_start_trans <-function(nst){
   return(matrix(1/nst,nrow=nst,ncol=nst))
 }
 
-make_near_hyp_mat <-function(nst){
-  to.self = 0.24
-  to.next = 0.12
-  p = make_trans_matrix(nst,to.self,to.next)
-  
-  #not_neigh_prob = 1- 
-  #p[p==0]=0.05 #  set a x s.t. 0 < x << 0.25 
-  #
-  #p = p/rowSums(p) # normalize
-  
-  return(p)
-}
 
 make_observed_map <-function(observed_ang,nst){
   inkr = 2*pi/(nst+1)
@@ -159,38 +131,3 @@ circular.interpol <- function(v){
   return(v[(start_l+1):(2*start_l)])
   
   }
-
-# =================================
-# parameters for simulation (old)
-# ================================
-
-head_pos_param <- function(num_state,num_neuron){
-  statenames = paste(rep("St",num_state),1:num_state,sep="")
-  resnames = paste(rep("Res",num_neuron),1:num_neuron,sep="")
-  
-  p = make_trans_matrix(num_state)
-  colnames(p)=rownames(p)=statenames
-  
-  rate_state = matrix(data=rep(2*1:num_state,num_neuron),nrow=num_neuron,byrow = T)
-  #sin_trans = sin(pi*(1:num_state)/(num_state+1))
-  
-  
-  noise_col = rnorm(num_neuron,0,1)
-  rate_neu = matrix(data=rep(noise_col,num_state),ncol=num_state,byrow = F)
-  
-  rate_mat = (rate_neu+rate_state)
-  rate_mat = abs(rate_mat) # in case we manage to get negative values
-  
-  # re-order rate_mat
-  # colnames(rate_mat) = statenames
-  # order_of_lam = names(sort(rate_mat[1,],decreasing=T))
-  # rate_mat = rate_mat[,order_of_lam]
-  
-  rate_mat = matrix(rate_mat,nrow=num_neuron) # in case rate_mate has become a vector
-  colnames(rate_mat) = statenames 
-  
-  if(num_neuron>1)rownames(rate_mat)=resnames
-  
-  return(list(resp=rate_mat,
-              tramat=p))
-}

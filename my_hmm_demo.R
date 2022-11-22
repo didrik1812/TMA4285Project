@@ -6,12 +6,9 @@ source("src/load_data.R") # functions for loading data
 
 nst = 25
 y = load_cell_data(from.x1 = TRUE) # start from first known state
-use.homo = T
-
 param = start_params(nst)
-if(use.homo) param$transmat=matrix(data=1/nst,ncol=nst,nrow=nst)
 
-mod = my.hmm(param,y) # runs filter in init, takes 6-7 second.
+mod = my.hmm(param,y)
 mod$optim.param(1)
 
 # plot transmat
@@ -37,7 +34,7 @@ plot(param$tramat,col=col)
 par(oma=c(1,1,1,1.5))
 par(mfrow=c(1,2))
 plot(mod$lambdas,col=col)
-plot(matrix(param$lambdas,ncol=ncol(mod$lambdas)),col=col)
+plot(matrix(param$resp,ncol=ncol(mod$lambdas)),col=col)
 
 # most likely hidden sequence, and post-prob.
 gx = mod$viterbi()
